@@ -29,7 +29,10 @@ paths:
               examples:
                 'user validation failed:':
                   value:
-                    error: 'user validation failed: (?<parameterName>[^:]+): Path `(?<parameterNameAgain>[^`]+)` is required.(, ([^:]+): Path `([^`]+)` is required.){0,2}'
+                    error: >-
+                      user validation failed: (?<parameterName>[^:]+): Path
+                      `(?<parameterNameAgain>[^`]+)` is required.(, ([^:]+): Path
+                      `([^`]+)` is required.){0,2}
           description: Parameter missing
         '409':
           content:
@@ -39,8 +42,8 @@ paths:
               examples:
                 username already exists:
                   value:
-                    error: Username already exists
-          description: Username already exists
+                    error: username already exists
+          description: username already exists
         '422':
           content:
             application/json:
@@ -48,12 +51,94 @@ paths:
                 $ref: '#/components/schemas/error'
               examples:
                 Parameter(s) value too short/long:
-                  value:
-                    error: 'Path `(?<parameterName>.+)` \(`(?<sampleValue>.+)`\) is (longer|shorter) than the (maximum|minimum) allowed length \((?<requiredLength>\d+)\)'
+                  value: |-
+                    {
+                        "error": "Path `(?<parameterName>.+)` \(`(?<sampleValue>.+)`\) is (longer|shorter) than the (maximum|minimum) allowed length \((?<requiredLength>\d+)\)"
+                    }
           description: 'Parameter(s) value too short/long:'
       operationId: createuser
       summary: Create a user
       description: Creates a new instance of a `user`.
+  /sessions:
+    summary: Path used to manage the list of sessions.
+    description: >-
+      The REST endpoint/path used to list and create zero or more `session` entities.  This path
+      contains a `GET` and `POST` operation to perform the list and create tasks, respectively.
+    post:
+      requestBody:
+        description: A new `session` to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+            examples:
+              POST /sessions request:
+                value:
+                  username: peeter
+                  password: qwerty1234
+        required: true
+      tags:
+        - sessions
+      responses:
+        '200':
+          description: Successful login
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                Required parameter missing:
+                  value:
+                    error: Required parameter missing
+          description: Required parameter missing
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                Invalid credentials:
+                  value:
+                    error: Invalid credentials
+          description: Invalid credentials
+      operationId: createsession
+      summary: Create a session
+      description: Creates a new instance of a `session`.
+    delete:
+      tags:
+        - sessions
+      responses:
+        '204':
+          description: Session successfuly deleted
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                Invalid authorization format:
+                  value:
+                    error: Invalid authorization format
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                Invalid token:
+                  value:
+                    error: Invalid token
+                Missing authorization:
+                  value:
+                    error: Missing authorization
+          description: Problem with authorization
+      security:
+        -
+          Bearer: []
+      summary: Deletes a session
+      description: Deletes given session with an id specified in authorization header
 components:
   schemas:
     user:
@@ -80,7 +165,23 @@ components:
           type: string
       example:
         error: some text
+    session:
+      title: Root Type for session
+      description: ''
+      type: object
+      properties:
+        token:
+          type: string
+      example:
+        token: 61603741c3d2f127caa67dd2
+  securitySchemes:
+    Bearer:
+      scheme: bearer
+      type: http
 tags:
   -
     name: users
+    description: ''
+  -
+    name: sessions
     description: ''
