@@ -1,11 +1,12 @@
-
 // Pull in dependencies
 const router = require('express').Router();
 const User = require('../models/User');
+const Account = require('../models/Account')
 const bcrypt = require('bcrypt');
+const {verifyToken} = require("../middelware");
 
 // Handle POST /users
-module.exports = router.post('/',  async (req, res) => {
+module.exports = router.post('/', async (req, res) => {
     try {
 
         // Save user to DB
@@ -22,6 +23,13 @@ module.exports = router.post('/',  async (req, res) => {
             user.password = hash;
             user.save();
         });
+
+        // Add account
+        await Account.create({userId: user._id,
+            number: process.env.BANK_PREFIX + Math.random().toString(36).substr(2, 9),
+            currency: 'EUR',
+            balance: '10000',
+            name: 'Main'});
 
         // 201 Created
         res.status(201).end()
@@ -46,3 +54,23 @@ module.exports = router.post('/',  async (req, res) => {
         return res.status(500).send({error: e.message})
     }
 })
+
+
+module.exports = router.get('/current', verifyToken, async (req, res) => {
+
+    //
+    try{
+        // Get user
+        const user =await User.findOne({_id: req.userId});
+
+        // 200 - OK
+        return res.status(200).send({
+            "username": user.username,
+            "name": user.name,
+            accounts
+        });
+    } catch (e){
+        return res.status(500).send({error: e.message})
+    }
+
+});

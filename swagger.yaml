@@ -53,7 +53,7 @@ paths:
                 Parameter(s) value too short/long:
                   value: |-
                     {
-                        "error": "Path `(?<parameterName>.+)` \(`(?<sampleValue>.+)`\) is (longer|shorter) than the (maximum|minimum) allowed length \((?<requiredLength>\d+)\)"
+                        "error": "Path `(?<parameterName>.+)` \\(`(?<sampleValue>.+)`\\) is (longer|shorter) than the (maximum|minimum) allowed length \\((?<requiredLength>\\d+)\\)"
                     }
           description: 'Parameter(s) value too short/long:'
       operationId: createuser
@@ -139,6 +139,47 @@ paths:
           Bearer: []
       summary: Deletes a session
       description: Deletes given session with an id specified in authorization header
+  /users/current:
+    get:
+      tags:
+        - users
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+              examples:
+                GET /users/current response:
+                  value: |-
+                    {
+                        "accounts": [
+                            {
+                                "account_number": "EExz2zxd72u",
+                                "balance": 10000,
+                                "currency": "EUR",
+                                "name": "Main",
+                                "userId": "6165591f9ddb320d85751d78"
+                            }
+                        "username": "peeter",
+                        "name": "Peeter"
+                    }
+          description: Successful request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                Missing Authorization header:
+                  value:
+                    error: Missing Authorization header
+          description: Unauthorized
+      security:
+        -
+          Bearer: []
+      summary: GET active user data
+      description: Returns active `user` data
 components:
   schemas:
     user:
@@ -174,6 +215,44 @@ components:
           type: string
       example:
         token: 61603741c3d2f127caa67dd2
+    account:
+      title: Root Type for account
+      description: ''
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        username:
+          type: string
+        accounts:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              balance:
+                format: int32
+                type: integer
+              currency:
+                type: string
+              number:
+                type: string
+              _id:
+                type: string
+      example:
+        id: 6163e48a90c02092a4456cb9
+        name: peeter
+        username: Pets
+        accounts:
+          -
+            name: Main
+            balance: 100000
+            currency: euro
+            number: EE7f0a3lgwy
+            _id: 6163e48a90c02092a4456cbb
   securitySchemes:
     Bearer:
       scheme: bearer
