@@ -13,4 +13,4 @@ jobs:
         run: echo 'Hello world',
              echo 'Here pipeline'
       - id: step3
-        run: npm intall
+        run: npm install
